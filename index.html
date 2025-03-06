@@ -23,6 +23,7 @@
                 <i class="fas fa-arrow-right"></i>
             </button>
             <button id="addBtn" class="bg-green-500 text-white px-4 rounded-lg ml-1 hover:bg-green-600">Add</button>
+            <button id="deleteBtn" class="bg-red-500 text-white px-4 rounded-lg ml-1 hover:bg-red-600">Delete</button>
         </div>
     </div>
 
@@ -62,6 +63,7 @@
         const saveQuoteButton = document.getElementById("saveQuoteBtn");
         const newQuoteInput = document.getElementById("newQuote");
         const newAuthorInput = document.getElementById("newAuthor");
+        const deleteBtn = document.getElementById("deleteBtn");
 
         let currentQuoteIndex = 0;
 
@@ -122,6 +124,18 @@
                 alert("Please fill in both fields.");
             }
         }
+
+        deleteBtn.addEventListener("click", function(){
+            quotes.splice(currentQuoteIndex, 1)
+
+            if(currentQuoteIndex === quotes.length){
+                alert("Last quote cannot be deleted")
+            }
+
+            currentQuoteIndex = (currentQuoteIndex === quotes.length) ? 0 : currentQuoteIndex
+            updateQuote(currentQuoteIndex)
+            
+        })
 
         saveQuoteButton.addEventListener("click", handleSaveQuoteButton)
 
