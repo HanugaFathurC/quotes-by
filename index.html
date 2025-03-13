@@ -11,7 +11,7 @@
 <body class="flex items-center justify-center min-h-screen bg-gradient-to-br from-white to-yellow-300">
     <div class="text-center">
         <div class="bg-white text-gray-800 text-center p-6 rounded-2xl shadow-xl max-w-md">
-            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Eko Wibowo" class="w-20 h-20 mx-auto rounded-full mb-4">
+            <img id="imgUrl" src="https://randomuser.me/api/portraits/men/75.jpg" alt="default-img" class="w-20 h-20 mx-auto rounded-full mb-4">
             <p id="quote" class="text-xl font-semibold italic"></p>
             <span id="author" class="text-gray-500 text-sm mt-2 block"></span>
         </div>
@@ -23,6 +23,7 @@
                 <i class="fas fa-arrow-right"></i>
             </button>
             <button id="addBtn" class="bg-green-500 text-white px-4 rounded-lg ml-1 hover:bg-green-600">Add</button>
+            <button id="editBtn" class="bg-blue-500 text-white px-4 rounded-lg ml-1 hover:bg-blue-600">Edit</button>
             <button id="deleteBtn" class="bg-red-500 text-white px-4 rounded-lg ml-1 hover:bg-red-600">Delete</button>
         </div>
     </div>
@@ -31,30 +32,49 @@
      <div id="addQuotePopup" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-lg">
             <h2 class="text-lg font-bold mb-4">Add New Quote</h2>
+            <input type="text" id="imgUrl" placeholder="Enter image URL" class="border p-2 rounded w-full mb-2">
             <input type="text" id="newQuote" placeholder="Enter quote" class="border p-2 rounded w-full mb-2">
             <input type="text" id="newAuthor" placeholder="Enter author" class="border p-2 rounded w-full mb-4">
             <button id="saveQuoteBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save</button>
             <button id="cancelBtn" class="bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-600">Cancel</button>
         </div>
     </div>
+
+    <!-- Popup form for editing the quote -->
+    <div id="editQuotePopup" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-lg font-bold mb-4">Edit Quote</h2>
+            <input type="text" id="editImgSrc" placeholder="Edit image source" class="border p-2 rounded w-full mb-4">
+            <input type="text" id="editQuote" placeholder="Edit quote" class="border p-2 rounded w-full mb-2">
+            <input type="text" id="editAuthor" placeholder="Edit author" class="border p-2 rounded w-full mb-2">
+            <button id="saveEditBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save</button>
+            <button id="cancelEditBtn" class="bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-600">Cancel</button>
+        </div>
+    </div>
+
+
     
     <script>
         let quotes = [
             {
+                imgUrl: "https://randomuser.me/api/portraits/men/75.jpg",
                 quote: "Luangkan waktu, jangan mencari waktu luang",
                 author: "- by Eko Wibowo"
             }, 
             {
+                imgUrl: "https://randomuser.me/api/portraits/men/75.jpg",
                 quote: "Tidaklah kamu memperoleh suatu ilmu tanpa bersusah payah",
                 author: "- by Syarafuddin Al-Imrithi"
             }
         ]
 
+        let imageUrl = document.getElementById("imgUrl")
         let quote = document.getElementById("quote")
         let author = document.getElementById("author")
 
         quote.innerHTML = quotes[0].quote
         author.innerHTML = quotes[0].author
+        imageUrl.src = quotes[0].imgUrl
 
         const prevButton = document.getElementById("prevBtn");
         const nextButton = document.getElementById("nextBtn");
@@ -64,12 +84,20 @@
         const newQuoteInput = document.getElementById("newQuote");
         const newAuthorInput = document.getElementById("newAuthor");
         const deleteBtn = document.getElementById("deleteBtn");
+        const editButton = document.getElementById("editBtn");
+        const editQuotePopup = document.getElementById("editQuotePopup");
+        const editQuoteInput = document.getElementById("editQuote");
+        const editAuthorInput = document.getElementById("editAuthor");
+        const editImgSrcInput = document.getElementById("editImgSrc");
+        const saveEditButton = document.getElementById("saveEditBtn");
+        const cancelEditButton = document.getElementById("cancelEditBtn");
 
         let currentQuoteIndex = 0;
 
         function updateQuote(index){
             quote.innerHTML = quotes[index].quote
             author.innerHTML = quotes[index].author
+            imageUrl.src = quotes[index].imgUrl
         }
 
         // code plumbing
@@ -112,10 +140,17 @@
         // });
 
         function handleSaveQuoteButton(){
+            let newUrl = imageUrl.value;
             const newQuote = newQuoteInput.value.trim();
             const newAuthor = newAuthorInput.value.trim();
+
+            if(!newUrl){
+                newUrl = "https://flowbite.com/docs/images/examples/image-2@2x.jpg";
+            }
+
             if (newQuote && newAuthor) {
-                quotes.push({ quote: newQuote, author: `- by ${newAuthor}` });
+                quotes.push({ imgUrl: newUrl, quote: newQuote, author: `- by ${newAuthor}` });
+                newUrl.value = "";
                 newQuoteInput.value = "";
                 newAuthorInput.value = "";
                 addQuotePopup.classList.add("hidden");
@@ -138,6 +173,32 @@
         })
 
         saveQuoteButton.addEventListener("click", handleSaveQuoteButton)
+
+        editButton.addEventListener("click", function(){
+            editQuotePopup.classList.remove("hidden");
+            editImgSrcInput.value = quotes[currentQuoteIndex].imgUrl;
+            editQuoteInput.value = quotes[currentQuoteIndex].quote;
+            editAuthorInput.value = quotes[currentQuoteIndex].author.replace("- by ", "");
+        })
+
+        cancelEditButton.addEventListener("click", function() {
+            editQuotePopup.classList.add("hidden");
+        });
+
+        saveEditButton.addEventListener("click", function() {
+            const editedQuote = editQuoteInput.value.trim();
+            const editedAuthor = editAuthorInput.value.trim();
+            const editedImgSrc = editImgSrcInput.value.trim();
+            console.log(editedQuote, editedAuthor, editedImgSrc);
+            if (editedQuote && editedAuthor && editedImgSrc) {
+                quotes[currentQuoteIndex] = { imgUrl: editedImgSrc, quote: editedQuote, author: `- by ${editedAuthor}` };
+                editQuotePopup.classList.add("hidden");
+                updateQuote(currentQuoteIndex);
+                console.log(quotes);
+            } else {
+                alert("Please fill in all fields.");
+            }
+        });
 
 
         updateQuote(currentQuoteIndex)
